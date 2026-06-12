@@ -2,25 +2,25 @@
 #include <vector>
 #include <cmath>
 
-const int WIDTH = 800;
-const int HEIGHT = 800;
+const int WIDTH = 1800;
+const int HEIGHT = 1800;
 
 const double AU {149.6e9};
 const double G {6.67438e-11};
-const double SCALE {50/AU};
+const double SCALE {70/AU};
 const double TIMESTEP = 3600*24;
 
 class Planet{
 	private:
 		double x_;
 		double y_;
-		double radius_;
-		sf::Color colour_;
-		double mass_;
+		const double radius_;
+		const sf::Color colour_;
+		const double mass_;
 
 		sf::CircleShape bodyImage_;
 
-		bool isSun_ {false};
+		const bool isSun_ {false};
 
 		std::vector<std::array<int, 2>> orbit_ {};
 		double distanceToSun_ {0};
@@ -54,9 +54,19 @@ int main()
 
 	Planet sun = Planet(0, 0, 20, sf::Color::Yellow, 1.98892e30, 0, true);
 
-	Planet earth = Planet(-1*AU, 0, 8, sf::Color::Blue, 5.9742e24);
+	Planet earth = Planet(-1*AU, 0, 8, sf::Color::Blue, 5.9742e24, 29.783e3);
 
-	std::vector<Planet> planets {sun, earth};
+	Planet mars = Planet(-1.524*AU, 0, 6, sf::Color::Red, 6.39e23, 24.077e3);
+
+	Planet mercury = Planet(0.387*AU, 0, 4, sf::Color::White, 3.3e23, -47.4e3);
+
+	Planet venus = Planet(0.723*AU, 0, 7, sf::Color(255, 165, 0), 4.8685e24, 35.02e3);
+
+	Planet jupiter = Planet(5.2*AU, 550, 16, sf::Color(255, 165, 0), 1.8982e27, -13.1e3);
+
+	Planet saturn = Planet(9.59*AU, -550, 12, sf::Color::Yellow, 5.6834e26, -9.7e3);
+
+	std::vector<Planet> planets {sun, earth, mars, mercury, venus, jupiter, saturn};
 
 	while ( window.isOpen() )
 	{
