@@ -1,6 +1,7 @@
 #include <SFML/Graphics.hpp>
 #include <vector>
 #include <cmath>
+#include <iostream>
 
 const int WIDTH = 1800;
 const int HEIGHT = 1800;
@@ -45,6 +46,23 @@ class Planet{
 			bodyImage_.setPosition({static_cast<float>(x),static_cast<float>(y)});
 			window.draw(bodyImage_);
 		}
+
+		std::pair<double, double> attraction(Planet other){
+			double distanceX {other.x_ - x_};
+			double distanceY {other.y_ - y_};
+			double distance {std::sqrt(pow(distanceX,2) + pow(distanceY,2))};
+
+			if (other.isSun_){
+				distanceToSun_ = distance;
+			}
+
+			double force {G * mass_ * other.mass_ / pow(distance,2)};
+			double theta {std::atan2(distanceY, distanceX)};
+			double forceX {std::cos(theta) * force};
+			double forceY {std::sin(theta) * force};
+
+			return {forceX, forceY};
+		}
 };
 
 
@@ -67,6 +85,9 @@ int main()
 	Planet saturn = Planet(9.59*AU, -550, 12, sf::Color::Yellow, 5.6834e26, -9.7e3);
 
 	std::vector<Planet> planets {sun, earth, mars, mercury, venus, jupiter, saturn};
+
+	auto [forceX, forceY] = earth.attraction(sun);
+	std::cout << forceX << " " << forceY;
 
 	while ( window.isOpen() )
 	{
