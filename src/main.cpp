@@ -3,8 +3,8 @@
 #include <cmath>
 #include <iostream>
 
-const int WIDTH = 1800;
-const int HEIGHT = 1800;
+const int WIDTH = 1600;
+const int HEIGHT = 1600;
 
 const double AU {149.6e9};
 const double G {6.67438e-11};
@@ -24,10 +24,10 @@ class Planet{
 		const bool isSun_ {false};
 
 		std::vector<std::array<int, 2>> orbit_ {};
-		double distanceToSun_ {0};
+		double distanceToSun_ {};
 
-		double xVel_ {0};
-		double yVel_ {0};
+		double xVel_ {};
+		double yVel_ {};
 
 	public:
 		Planet(double x, double y, double radius, sf::Color colour, double mass, double yVel = 0, bool isSun = false)
@@ -35,9 +35,12 @@ class Planet{
 		{
 			bodyImage_.setRadius(radius_);
 			bodyImage_.setFillColor(colour_);
+			bodyImage_.setOrigin({static_cast<float>(radius_), static_cast<float>(radius_)});
 		}
 
 		double getYVel() const{return yVel_;}
+		double getX() const{return x_;}
+		double getY() const{return y_;}
 
 		void draw(sf::RenderWindow& window){
 			double x {x_ * SCALE + WIDTH/2};
@@ -47,7 +50,7 @@ class Planet{
 			window.draw(bodyImage_);
 		}
 
-		std::pair<double, double> attraction(Planet other){
+		std::pair<double, double> attraction(const Planet& other){
 			double distanceX {other.x_ - x_};
 			double distanceY {other.y_ - y_};
 			double distance {std::sqrt(pow(distanceX,2) + pow(distanceY,2))};
@@ -62,6 +65,27 @@ class Planet{
 			double forceY {std::sin(theta) * force};
 
 			return {forceX, forceY};
+		}
+
+		void updatePosition(const std::vector<Planet>& planets){
+			double totalFx {};
+			double totalFy {};
+
+			for (const auto& planet : planets){
+				if (this == &planet){
+					continue;
+				}
+
+				auto [fx, fy] = attraction(planet);
+				totalFx += fx;
+				totalFy += fy;
+			}
+
+			xVel_ += totalFx / mass_ * TIMESTEP;
+			yVel_ += totalFy / mass_ * TIMESTEP;
+
+			x_ += xVel_ * TIMESTEP;
+			y_ += yVel_ * TIMESTEP;
 		}
 };
 
@@ -86,9 +110,10 @@ int main()
 
 	std::vector<Planet> planets {sun, earth, mars, mercury, venus, jupiter, saturn};
 
-	auto [forceX, forceY] = earth.attraction(sun);
-	std::cout << forceX << " " << forceY;
+	// auto [forceX, forceY] = earth.attraction(sun);
+	// std::cout << forceX << " " << forceY;
 
+	window.setFramerateLimit(60);
 	while ( window.isOpen() )
 	{
 		while ( const std::optional event = window.pollEvent() )
@@ -99,7 +124,9 @@ int main()
 
 		window.clear();
 		for(Planet& planet : planets){
+			planet.updatePosition(planets);
 			planet.draw(window);
+			std::cout << planet.getX() << "	" << planet.getY() << '\n';
 		}
 		window.display();
 	}
