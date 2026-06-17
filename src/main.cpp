@@ -2,6 +2,7 @@
 #include <vector>
 #include <cmath>
 #include <iostream>
+//#include <SFML/Graphics/VertexArray.hpp>
 
 const int WIDTH = 1600;
 const int HEIGHT = 1600;
@@ -23,7 +24,8 @@ class Planet{
 
 		const bool isSun_ {false};
 
-		std::vector<std::array<int, 2>> orbit_ {};
+		std::vector<sf::Vertex> orbit_{};
+
 		double distanceToSun_ {};
 
 		double xVel_ {};
@@ -45,6 +47,14 @@ class Planet{
 		void draw(sf::RenderWindow& window){
 			double x {x_ * SCALE + WIDTH/2};
 			double y {y_ * SCALE + HEIGHT/2};
+
+			if (orbit_.size()>10000){
+				orbit_.erase(orbit_.begin());
+			}
+
+			if (orbit_.size()>2){
+				window.draw(orbit_.data(), orbit_.size(), sf::PrimitiveType::LineStrip);
+			}
 
 			bodyImage_.setPosition({static_cast<float>(x),static_cast<float>(y)});
 			window.draw(bodyImage_);
@@ -86,6 +96,11 @@ class Planet{
 
 			x_ += xVel_ * TIMESTEP;
 			y_ += yVel_ * TIMESTEP;
+
+			double orbitPointX {x_*SCALE + WIDTH/2};
+			double orbitPointY {y_*SCALE + HEIGHT/2};
+			sf::Vertex point{{static_cast<float>(orbitPointX),static_cast<float>(orbitPointY)}, colour_};
+			orbit_.push_back(point);
 		}
 };
 
@@ -126,7 +141,7 @@ int main()
 		for(Planet& planet : planets){
 			planet.updatePosition(planets);
 			planet.draw(window);
-			std::cout << planet.getX() << "	" << planet.getY() << '\n';
+			// std::cout << planet.getX() << "	" << planet.getY() << '\n';
 		}
 		window.display();
 	}
